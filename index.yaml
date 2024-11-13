@@ -9,6 +9,6 @@ entries:
     name: test
     type: application
     urls:
-    - https://Tiket-s8d.github.io/testing-helm/test-0.1.0.tgz
+    - https://tiket-s8d.github.io/testing_helm/test-0.1.0.tgz
     version: 0.1.0
 generated: "2024-11-13T08:59:43.971222813-05:00"
