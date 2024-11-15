@@ -1,0 +1,114 @@
+---
+# Source: test/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+  labels:
+    helm.sh/chart: test-0.1.0
+    app.kubernetes.io/name: test
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: test
+    app.kubernetes.io/instance: test
+  ports:
+  - port: 80
+    targetPort: 5000
+---
+# Source: test/templates/deploy.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+  labels:
+    helm.sh/chart: test-0.1.0
+    app.kubernetes.io/name: test
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: test
+      app.kubernetes.io/instance: test
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: test-0.1.0
+        app.kubernetes.io/name: test
+        app.kubernetes.io/instance: test
+        app.kubernetes.io/version: "1.16.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      containers:
+      - name: test
+        image: "192.168.0.113:8082/test:0.1"
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: http
+            containerPort: 80
+            protocol: TCP
+        livenessProbe:
+            httpGet:
+              path: /healthy
+              port: http
+---
+# Source: test/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test
+  labels:
+    helm.sh/chart: test-0.1.0
+    app.kubernetes.io/name: test
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  rules:
+    - host: "test"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: test
+                port:
+                  number: 80
+    - host: "test"
+      http:
+        paths:
+          - path: /healthy
+            pathType: Prefix
+            backend:
+              service:
+                name: test
+                port:
+                  number: 80
+---
+# Source: test/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "test-test-connection"
+  labels:
+    helm.sh/chart: test-0.1.0
+    app.kubernetes.io/name: test
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['test:80']
+  restartPolicy: Never
